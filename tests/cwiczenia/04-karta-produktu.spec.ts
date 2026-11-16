@@ -30,7 +30,6 @@ test('cena promocyjna kremu jest taka sama na kafelku, karcie produktu i w koszy
   await expect(page.getByTestId('product-price')).toContainText('26,39 zł');
   await expect(page.getByTestId('product-badge')).toContainText('-20%');
   await page.getByRole('button', { name: 'Dodaj do koszyka' }).click();
-  await page.getByRole('button', { name: 'Dodaj do koszyka' }).click();
   await expect(page.getByTestId('flash')).toContainText('Dodano do koszyka: Krem do twarzy na dzień');
   await page.getByRole('link', { name: 'Koszyk' }).click();
   await expect(page.getByTestId('cart-item-price')).toBeVisible();
