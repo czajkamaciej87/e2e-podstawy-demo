@@ -36,14 +36,41 @@ test.afterEach(async ({ request }) => {
   expect([200, 409]).toContain(odpowiedz.status());
 });
 
-test.fixme('„Wróć” zamyka okno i zamówienie zostaje nowe', async ({ page }) => {
+test('„Wróć” zamyka okno i zamówienie zostaje nowe', async ({ page }) => {
   // TODO 1: w wierszu zamówienia `numer` kliknij „Anuluj”.
   // TODO 2: sprawdź, że okno (rola dialog) jest widoczne, a jego nagłówek to „Anulować zamówienie <numer>?”.
   // TODO 3: kliknij „Wróć” w oknie.
   // TODO 4: sprawdź, że okno jest ukryte, a wiersz nadal ma status „Nowe”.
+  const wiersz = page.getByRole('row').filter({ hasText: numer });
+  const okno = page.getByRole('dialog');
+
+  // Krok 1: w wierszu naszego zamówienia klikamy „Anuluj”.
+  await wiersz.getByRole('button', { name: 'Anuluj' }).click();
+
+  // Krok 2: okno jest widoczne i pyta o właściwe zamówienie.
+  await expect(okno).toBeVisible();
+  await expect(okno.getByRole('heading')).toHaveText(`Anulować zamówienie ${numer}?`);
+
+  // Krok 3: rezygnujemy przyciskiem „Wróć”.
+  await okno.getByRole('button', { name: 'Wróć' }).click();
+
+  // Krok 4: okno znika, a zamówienie nadal ma status „Nowe”.
+  await expect(okno).toBeHidden();
+  await expect(wiersz).toContainText('Nowe');
 });
 
-test.fixme('„Tak, anuluj” anuluje zamówienie', async ({ page }) => {
+test('„Tak, anuluj” anuluje zamówienie', async ({ page }) => {
   // TODO 1: w wierszu zamówienia `numer` kliknij „Anuluj”, w oknie kliknij „Tak, anuluj”.
   // TODO 2: sprawdź komunikat „Anulowano zamówienie <numer>” i status „Anulowane” w wierszu.
+  const wiersz = page.getByRole('row').filter({ hasText: numer });
+  const okno = page.getByRole('dialog');
+
+  // Krok 1: otwieramy okno i potwierdzamy anulowanie.
+  await wiersz.getByRole('button', { name: 'Anuluj' }).click();
+  await okno.getByRole('button', { name: 'Tak, anuluj' }).click();
+
+  // Krok 2: strona pokazuje komunikat, a wiersz ma status „Anulowane”.
+  await expect(page.getByText(`Anulowano zamówienie ${numer}`)).toBeVisible();
+  await expect(wiersz).toContainText('Anulowane');
+
 });
