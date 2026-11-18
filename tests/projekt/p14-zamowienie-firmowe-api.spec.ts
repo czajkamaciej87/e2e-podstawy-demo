@@ -9,7 +9,7 @@ test.describe('Zamówienie firmowe przez API', () => {
     await zalogujPrzezApi(request, 'biuro', 'biuro123');
   });
 
-  test('zamówienie firmowe 10 sztuk ma wartość 399,90 zł i fakturę FV/2026/<numer> na Biuro Mikołaja', async ({ request }) => {
+  test('zamówienie firmowe 10 sztuk ma wartość 399,90 zł i fakturę FV/2026/<numer> na Biuro Mikołaja z NIP 1012023036', async ({ request }) => {
     const odpowiedz = await request.post('/api/business-orders', {
       data: { product_id: 21, qty: 10, nip: '101-202-30-36', company: 'Biuro Mikołaja' },
     });
@@ -23,7 +23,11 @@ test.describe('Zamówienie firmowe przez API', () => {
 
     const faktura = await request.get(`/api/orders/${zamowienie.number}/invoice`);
     expect(faktura.status()).toBe(200);
-    expect((await faktura.json()).invoice_number).toBe(`FV/2026/${zamowienie.number}`);
+    const daneFaktury = await faktura.json();
+    expect(daneFaktury.invoice_number).toBe(`FV/2026/${zamowienie.number}`);
+    // Nabywca to firma z żądania: NIP 101-202-30-36 zapisany bez kresek, a nie NIP sprzedawcy.
+    expect(daneFaktury.buyer.name).toBe('Biuro Mikołaja');
+    expect(daneFaktury.buyer.nip).toBe('1012023036');
   });
 
   test('zamówienie firmowe na 1001 sztuk zwraca 400 z błędem pola qty', async ({ request }) => {
