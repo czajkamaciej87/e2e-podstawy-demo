@@ -10,6 +10,13 @@ test('nowy adres ustawiony jako domyślny ma jedyną plakietkę „Domyślny”,
   await zaloguj(page);
   await page.goto('/konto/adresy');
 
+  // Stan przed testem: na liście jest tylko „Adres główny” i to on jest domyślny.
+  // Adres zostawiony przez przerwany test zmieniłby wynik sprawdzania plakietki „Domyślny”.
+  const adresy = page.getByRole('main').getByRole('article');
+  const glowny = page.getByRole('article', { name: /^Adres główny/ });
+  await expect(glowny.getByText('Domyślny', { exact: true })).toBeVisible();
+  await expect(adresy, 'przed testem konto ma tylko „Adres główny”').toHaveCount(1);
+
   await page.getByLabel('Nazwa adresu').fill(nazwa);
   await page.getByLabel('Ulica i numer').fill('ul. Biurowa 7');
   await page.getByLabel('Kod pocztowy').fill('00-950');
@@ -29,7 +36,6 @@ test('nowy adres ustawiony jako domyślny ma jedyną plakietkę „Domyślny”,
   await expect(page.getByText('Domyślny', { exact: true })).toHaveCount(1);
 
   // „Adres główny” nie ma przycisku „Usuń”.
-  const glowny = page.getByRole('article', { name: /^Adres główny/ });
   await expect(glowny).toBeVisible();
   await expect(glowny.getByRole('button', { name: /Usuń/ })).toHaveCount(0);
 
